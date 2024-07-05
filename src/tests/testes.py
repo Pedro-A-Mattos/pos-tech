@@ -76,16 +76,16 @@ def download_file(link: str, base_url: str, save_path: str):
 
 
 if __name__ == "__main__":
-    url = "http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02"  # Substitua pela URL que deseja consultar
-    base_url = "http://vitibrasil.cnpuv.embrapa.br/"  # Substitua pela base URL do site
+    url = "http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02"  
+    base_url = "http://vitibrasil.cnpuv.embrapa.br/" 
 
     page_content = get_webdriver(url)
     filtered_links = extract_data_from_page(page_content)
 
-    # Se houver links filtrados, faça o download do primeiro link
+
     if filtered_links:
         download_link = filtered_links[0]
-        save_path = ".\Producao.csv"  # Caminho onde o arquivo será salvo
+        save_path = "../storage/Producao.csv"  
         download_file(download_link, base_url, save_path)
     else:
         logging.info("Nenhum link para download encontrado.")

@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query  # Importa classes e funções
 import logging  # Importa a biblioteca de logging para registrar informações e erros
 from utils.browser_automation import get_webdriver  # Importa função de scraping de sites
 from utils.web_data_extractor import extract_data_from_page
+from utils.donwload_files import download_file
 app = FastAPI()
 
 # @app.get("/")
@@ -26,7 +27,6 @@ async def get_website_links():
     # Faz o scraping do site especificado
     website_content = get_webdriver("http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_01")
 
-    # Verifica se há conteúdo no site
     if not website_content:
         # Lança uma exceção HTTP 404 se nenhum conteúdo for encontrado
         raise HTTPException(status_code=404, detail="Nenhum conteúdo encontrado")
@@ -56,11 +56,20 @@ async def get_website_links2(link: str = Query(..., description="URL do link par
 
     # Faz o scraping do site especificado pelo link
     website_content = get_webdriver(link)
-    teste = extract_data_from_page(website_content)
-    # Verifica se há conteúdo no site
+    link_name = extract_data_from_page(website_content)
+    # 
     if not website_content:
         # Lança uma exceção HTTP 404 se nenhum conteúdo for encontrado
         raise HTTPException(status_code=404, detail="Nenhum conteúdo encontrado")
 
-    # Retorna os links extraídos como resposta
-    return {"content": teste}
+    return {"content": link_name}
+
+@app.get("/downlaod/")
+async def download(link: str = Query(..., description="URL do link para o arquivo .CSV")):
+    logging.info(f"Recebendo link: {link}")
+
+    base_url = "http://vitibrasil.cnpuv.embrapa.br/"  # Substitua pela base URL do site
+    save_path = "../storage/Producao.csv"  # Caminho onde o arquivo será salvo
+    download_file(link, base_url, save_path)
+
+    return {"message": "Arquivo CSV baixado e salvo com sucesso"}
