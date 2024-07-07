@@ -7,7 +7,7 @@ def download_file(link: str, base_url: str, save_path: str):
     try:
         if not link.startswith("http"):
             link = os.path.join(base_url, link)
-
+            
         response = requests.get(link)
         response.raise_for_status()  
 

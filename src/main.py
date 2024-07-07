@@ -1,19 +1,18 @@
-from fastapi import FastAPI, HTTPException, Query  # Importa classes e funções necessárias do FastAPI
+from fastapi import FastAPI, HTTPException, Query, Depends  # Importa classes e funções necessárias do FastAPI
+from fastapi.testclient import TestClient
 import logging  # Importa a biblioteca de logging para registrar informações e erros
 from utils.browser_automation import get_webdriver  # Importa função de scraping de sites
-from utils.web_data_extractor import extract_data_from_page
+from utils.web_data_extractor import extract_data_from_page, mapear_topicos, mapear_subopcoes
 from utils.donwload_files import download_file
-app = FastAPI()
+import requests
 
-# @app.get("/")
-# async def root():
-#     return {"message": "Hello World"}
+app = FastAPI()
 
 # Configura o logging para registrar informações e erros
 logging.basicConfig(level=logging.INFO)
 
 # Define uma rota GET para obter links do website
-@app.get("/links/")
+@app.get("/topicos/")
 async def get_website_links():
     """
     Rota GET para obter links do primeiro nível de um website.
@@ -25,51 +24,42 @@ async def get_website_links():
         HTTPException: Se nenhum conteúdo ou link for encontrado.
     """
     # Faz o scraping do site especificado
-    website_content = get_webdriver("http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_01")
+    website_content = get_webdriver("http://vitibrasil.cnpuv.embrapa.br/")
 
     if not website_content:
         # Lança uma exceção HTTP 404 se nenhum conteúdo for encontrado
         raise HTTPException(status_code=404, detail="Nenhum conteúdo encontrado")
     
+    links_data_topics = mapear_topicos(website_content)
+    return links_data_topics
 
-@app.get("/links2/")
-async def get_website_links2(link: str = Query(..., description="URL do link para acessar")):
-    """
-    Rota GET para obter links do segundo nível de um website.
+#TODO Fazer ele me entregar o link do download direta para cada subtópico
+@app.get("/subtopicos/")
+async def get_subtopics(topics: dict = Depends(get_website_links)):
+    # Faça uma requisição GET interna para a rota1
+    # response = client.get("/topicos")
+    dict_final = {}
+    for key_topic, value_topic in topics.items():
+        dict_final[key_topic] = {}
+        response = requests.get(value_topic)
 
-    Args:
-        link (str): A URL do link para acessar.
+        subtopics = mapear_subopcoes(response.text)
+        
+        for key_subtopic, value_subtopic in subtopics.items():
+            path = requests.get(value_subtopic)
+            # Pega o conteúdo da página como texto
+            conteudo_pagina = path.text
+            link_name = extract_data_from_page(conteudo_pagina)
+            dict_final[key_topic][key_subtopic] = link_name
 
-    Returns:
-        dict: Um dicionário contendo uma lista de links encontrados.
-
-    Raises:
-        HTTPException: Se o parâmetro 'link' estiver ausente, ou se nenhum conteúdo ou link for encontrado.
-    """
-    # Registra o link recebido
-    logging.info(f"Recebendo link: {link}")
-
-    # Verifica se o link foi recebido corretamente
-    if not link:
-        # Lança uma exceção HTTP 400 se o parâmetro 'link' estiver ausente
-        raise HTTPException(status_code=400, detail="Parâmetro 'link' é obrigatório")
-
-    # Faz o scraping do site especificado pelo link
-    website_content = get_webdriver(link)
-    link_name = extract_data_from_page(website_content)
-    # 
-    if not website_content:
-        # Lança uma exceção HTTP 404 se nenhum conteúdo for encontrado
-        raise HTTPException(status_code=404, detail="Nenhum conteúdo encontrado")
-
-    return {"content": link_name}
-
+    return dict_final
+    
 @app.get("/downlaod/")
 async def download(link: str = Query(..., description="URL do link para o arquivo .CSV")):
     logging.info(f"Recebendo link: {link}")
 
     base_url = "http://vitibrasil.cnpuv.embrapa.br/"  # Substitua pela base URL do site
-    save_path = "../storage/Producao.csv"  # Caminho onde o arquivo será salvo
+    save_path = "../storage/teste.csv"  # Caminho onde o arquivo será salvo
     download_file(link, base_url, save_path)
 
     return {"message": "Arquivo CSV baixado e salvo com sucesso"}
