@@ -36,30 +36,31 @@ async def get_website_links():
 #TODO Fazer ele me entregar o link do download direta para cada subtópico
 @app.get("/subtopicos/")
 async def get_subtopics(topics: dict = Depends(get_website_links)):
-    # Faça uma requisição GET interna para a rota1
-    # response = client.get("/topicos")
     dict_final = {}
     for key_topic, value_topic in topics.items():
         dict_final[key_topic] = {}
         response = requests.get(value_topic)
 
         subtopics = mapear_subopcoes(response.text)
-        
-        for key_subtopic, value_subtopic in subtopics.items():
-            path = requests.get(value_subtopic)
-            # Pega o conteúdo da página como texto
-            conteudo_pagina = path.text
-            link_name = extract_data_from_page(conteudo_pagina)
-            dict_final[key_topic][key_subtopic] = link_name
+        if subtopics:
+            for key_subtopic, value_subtopic in subtopics.items():
+                path = requests.get(value_subtopic)
+                # Pega o conteúdo da página como texto
+                conteudo_pagina = path.text
+                link_name = extract_data_from_page(conteudo_pagina)
+                dict_final[key_topic][key_subtopic] = link_name
+        else:
+            link_name = extract_data_from_page(response.text)         
+            dict_final[key_topic] = link_name 
 
     return dict_final
     
 @app.get("/downlaod/")
 async def download(link: str = Query(..., description="URL do link para o arquivo .CSV")):
     logging.info(f"Recebendo link: {link}")
-
-    base_url = "http://vitibrasil.cnpuv.embrapa.br/"  # Substitua pela base URL do site
-    save_path = "../storage/teste.csv"  # Caminho onde o arquivo será salvo
+    name_file = link.split("download/")[-1]
+    base_url = "http://vitibrasil.cnpuv.embrapa.br/"  
+    save_path = f"../storage/{name_file}"  
     download_file(link, base_url, save_path)
 
     return {"message": "Arquivo CSV baixado e salvo com sucesso"}
