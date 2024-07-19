@@ -1,18 +1,24 @@
-from fastapi import FastAPI, HTTPException, Query, Depends  # Importa classes e funções necessárias do FastAPI
+from fastapi import FastAPI, HTTPException, Query, Depends, Body  # Importa classes e funções necessárias do FastAPI
 from fastapi.testclient import TestClient
 import logging  # Importa a biblioteca de logging para registrar informações e erros
-from utils.browser_automation import get_webdriver  # Importa função de scraping de sites
-from utils.web_data_extractor import extract_data_from_page, mapear_topicos, mapear_subopcoes
-from utils.donwload_files import download_file
+from src.utils.browser_automation import get_webdriver  # Importa função de scraping de sites
+from src.utils.web_data_extractor import extract_data_from_page, mapear_topicos, mapear_subopcoes
+from src.utils.donwload_files import download_file
 import requests
+from src.auth.auth_handler import sign_jwt
+from src.auth.auth_bearer import JWTBearer
+from src.utils.model import PostSchema, UserSchema, UserLoginSchema
+from src.auth.check_users import check_user
 
 app = FastAPI()
 
 # Configura o logging para registrar informações e erros
 logging.basicConfig(level=logging.INFO)
 
+
+
 # Define uma rota GET para obter links do website
-@app.get("/topicos/")
+@app.get("/topicos/", dependencies=[Depends(JWTBearer())])
 async def get_website_links():
     """
     Rota GET para obter links do primeiro nível de um website.
@@ -64,3 +70,20 @@ async def download(link: str = Query(..., description="URL do link para o arquiv
     download_file(link, base_url, save_path)
 
     return {"message": "Arquivo CSV baixado e salvo com sucesso"}
+
+#post para informar o email e a senha cadastrados
+@app.post("/user/login", tags=["user"])
+async def user_login(user: UserLoginSchema = Body(...)):
+    if check_user(user):
+        return sign_jwt(user.email)
+    return {
+        "error": "Wrong login details!"
+    }
+
+@app.post("/user/login", tags=["user"])
+async def user_login(user: UserLoginSchema = Body(...)):
+    if check_user(user):
+        return sign_jwt(user.email)
+    return {
+        "error": "Wrong login details!"
+    }
