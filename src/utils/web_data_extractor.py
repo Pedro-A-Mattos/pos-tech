@@ -10,7 +10,7 @@ def extract_data_from_page(page_content: str):
         for link in links:
             href = link['href']
             if href.startswith("download"):
-                filtered_link = href
+                filtered_link = href.split('/')[-1]
         
         logging.info(f"Link filtrado: {filtered_link}")
         return filtered_link
