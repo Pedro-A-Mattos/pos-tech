@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.11
 
       - name: Install dependencies
         run: |
@@ -25,8 +25,9 @@ jobs:
 
       - name: Install AWS CLI
         run: |
-          curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
-          sudo installer -pkg AWSCLIV2.pkg -target /
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -37,5 +38,5 @@ jobs:
 
       - name: Deploy to Elastic Beanstalk
         run: |
-          eb init -p python-3.8 embrapaproject --region us-east-1
+          eb init -p python-3.11 EmbrapaProject --region us-east-1 --platform python-3.11
           eb deploy postech
