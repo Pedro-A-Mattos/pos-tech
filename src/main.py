@@ -134,11 +134,3 @@ async def user_login(user: UserLoginSchema = Body(...)):
     return {
         "error": "Wrong login details!"
     }
-
-@app.post("/user/login", tags=["user"])
-async def user_login(user: UserLoginSchema = Body(...)):
-    if check_user(user):
-        return sign_jwt(user.email)
-    return {
-        "error": "Wrong login details!"
-    }
