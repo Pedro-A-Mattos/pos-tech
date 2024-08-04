@@ -43,6 +43,18 @@ async def get_website_links():
 #TODO Fazer ele me entregar o link do download direta para cada subtópico
 @app.get("/subtopicos/")
 async def get_subtopics(topics: dict = Depends(get_website_links)):
+    """
+    Processa um dicionário de tópicos para extrair links de subopções e páginas associadas.
+
+    Para cada tópico, faz uma requisição HTTP para obter subopções. Para cada subopção, extrai os links de uma página. 
+    Se não houver subopções, extrai os links diretamente da página do tópico.
+
+    Args:
+        topics (dict): Dicionário com tópicos e URLs associados.
+
+    Returns:
+        dict: Dicionário com tópicos e subopções, incluindo os links extraídos.
+    """
     dict_final = {}
     for key_topic, value_topic in topics.items():
         dict_final[key_topic] = {}
@@ -64,6 +76,20 @@ async def get_subtopics(topics: dict = Depends(get_website_links)):
     
 @app.get("/download/")
 async def download_f(name_file: str = Query(..., description="Nome do arquivo .CSV")):
+    """
+    Faz o download de um arquivo CSV e o salva no diretório especificado.
+
+    Recebe o nome de um arquivo CSV, constrói o URL para download e salva o arquivo no diretório `../storage`.
+
+    Args:
+        name_file (str): Nome do arquivo CSV a ser baixado.
+
+    Returns:
+        dict: Mensagem de sucesso se o arquivo for baixado e salvo com sucesso.
+
+    Raises:
+        HTTPException: Se ocorrer um erro durante o download.
+    """
     try:
         logging.info(f"Recebendo link: {name_file}")
         base_url = "http://vitibrasil.cnpuv.embrapa.br/download/"
@@ -80,6 +106,22 @@ async def show(
     link: str = Query(..., description="Nome do arquivo .CSV"),
     anos: str = Query(None, description="Coloque os anos a serem filtrados, separados por vírgulas (ex: 1970,1971,1980).")
 ):
+    """
+    Exibe uma tabela HTML com dados filtrados de um arquivo CSV.
+
+    Recebe o nome do arquivo CSV e opcionalmente anos para filtragem. Carrega o arquivo, filtra por anos se fornecidos, 
+    e retorna uma tabela HTML com os dados filtrados.
+
+    Args:
+        link (str): Nome do arquivo CSV a ser carregado.
+        anos (str, optional): Anos a serem filtrados, separados por vírgulas.
+
+    Returns:
+        HTMLResponse: Tabela HTML com os dados filtrados ou mensagem de erro.
+
+    Raises:
+        HTTPException: Se ocorrer um erro inesperado.
+    """
     try:
         logging.info(f"Recebendo nome: {link}")
         name_file = link.split("download/")[-1]
@@ -129,6 +171,18 @@ async def show(
 #post para informar o email e a senha cadastrados
 @app.post("/user/login", tags=["user"])
 async def user_login(user: UserLoginSchema = Body(...)):
+    """
+    Faz login de um usuário e retorna um token JWT se as credenciais forem válidas.
+
+    Recebe as credenciais do usuário e verifica se são válidas. Se forem, retorna um token JWT. 
+    Caso contrário, retorna uma mensagem de erro.
+
+    Args:
+        user (UserLoginSchema): Credenciais do usuário para login.
+
+    Returns:
+        dict: Um dicionário contendo um token JWT ou uma mensagem de erro.
+    """
     if check_user(user):
         return sign_jwt(user.email)
     return {
