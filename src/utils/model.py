@@ -1,6 +1,6 @@
 
 
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 
 class PostSchema(BaseModel):
@@ -8,13 +8,14 @@ class PostSchema(BaseModel):
     title: str = Field(...)
     content: str = Field(...)
 
-    class Config:
+    model_config = ConfigDict(
         json_schema_extra = {
             "example": {
                 "title": "Securing FastAPI applications with JWT.",
                 "content": "In this tutorial, you'll learn how to secure your application by enabling authentication using JWT. We'll be using PyJWT to sign, encode and decode JWT tokens...."
             }
         }
+    )
 
 
 class UserSchema(BaseModel):
@@ -22,7 +23,7 @@ class UserSchema(BaseModel):
     email: EmailStr = Field(...)
     password: str = Field(...)
 
-    class Config:
+    model_config = ConfigDict(
         json_schema_extra = {
             "example": {
                 "fullname": "Elon Musk",
@@ -30,15 +31,17 @@ class UserSchema(BaseModel):
                 "password": "passwordpassword"
             }
         }
+    )
 
 class UserLoginSchema(BaseModel):
     email: EmailStr = Field(...)
     password: str = Field(...)
 
-    class Config:
+    model_config = ConfigDict(
         json_schema_extra = {
             "example": {
                 "email": "emusk@x.com",
                 "password": "passwordpassword"
             }
         }
+    )
