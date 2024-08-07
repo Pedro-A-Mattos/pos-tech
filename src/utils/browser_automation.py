@@ -22,9 +22,14 @@ def get_webdriver(url: str):
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
 
-        # Usando o chromedriver instalado manualmente
+        # To use on aws
         service = Service('/usr/local/bin/chromedriver')
         driver = webdriver.Chrome(service=service, options=options)
+        
+        # To use local
+        #driver = webdriver.Chrome(options=options)
+        
+        
         driver.get(url)
         page_content = driver.page_source
         driver.quit()
