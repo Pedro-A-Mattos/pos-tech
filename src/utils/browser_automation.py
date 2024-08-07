@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 def get_webdriver(url: str):
     """
@@ -21,8 +23,9 @@ def get_webdriver(url: str):
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
 
-        # Inicia o webdriver do Chrome
-        driver = webdriver.Chrome(options=options)
+        # Usando webdriver-manager para gerenciar o ChromeDriver
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
         driver.get(url)
         page_content = driver.page_source
         driver.quit()
