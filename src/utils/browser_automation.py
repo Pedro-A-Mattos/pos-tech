@@ -23,11 +23,11 @@ def get_webdriver(url: str):
         options.add_argument("--disable-dev-shm-usage")
 
         # To use on aws
-        service = Service('/usr/local/bin/chromedriver')
-        driver = webdriver.Chrome(service=service, options=options)
+        #service = Service('/usr/local/bin/chromedriver')
+        #driver = webdriver.Chrome(service=service, options=options)
         
         # To use local
-        #driver = webdriver.Chrome(options=options)
+        driver = webdriver.Chrome(options=options)
         
         
         driver.get(url)
