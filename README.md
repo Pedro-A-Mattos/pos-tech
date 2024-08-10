@@ -38,16 +38,53 @@ Esse token deve ser incluído no cabeçalho Authorization das requisições subs
 
 ![image](https://github.com/user-attachments/assets/a56d7fdd-aed7-4b19-9d98-1f5129211602)
 
-
 ## 2. Listagem de Tópicos (tópicos):
 
 Após a autenticação, utilize o token JWT gerado para acessar o endpoint tópicos. Este endpoint retornará os links de cada tópico disponível (produção, processamento, comercialização, importação e exportação) no site.
+````
+{
+  "Produção": "http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02",
+  "Processamento": "http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_03",
+  "Comercialização": "http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04",
+  "Importação": "http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_05",
+  "Exportação": "http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_06"
+}
+````
 
 ## 3. Listagem de Subtópicos (subtópicos):
-Com os links dos tópicos em mãos, o próximo passo é utilizar o endpoint subtópicos, que aceita como entrada o link de um tópico e retorna os links de download dos arquivos CSV relacionados a esse tópico.
+Após obter os links dos tópicos, o próximo passo é utilizar o endpoint subtópicos. Este endpoint aceita os links dos tópicos como entrada e retorna os nomes dos arquivos CSV relacionados a cada tópico para download.
+````
+{
+  "Produção": "Producao.csv",
+  "Processamento": {
+    "Viníferas": "ProcessaViniferas.csv",
+    "Americanas e híbridas": "ProcessaAmericanas.csv",
+    "Uvas de mesa": "ProcessaMesa.csv",
+    "Sem classificação": "ProcessaSemclass.csv"
+  },
+  "Comercialização": "Comercio.csv",
+  "Importação": {
+    "Vinhos de mesa": "ImpVinhos.csv",
+    "Espumantes": "ImpEspumantes.csv",
+    "Uvas frescas": "ImpFrescas.csv",
+    "Uvas passas": "ImpPassas.csv",
+    "Suco de uva": "ImpSuco.csv"
+  },
+  "Exportação": {
+    "Vinhos de mesa": "ExpVinho.csv",
+    "Espumantes": "ExpEspumantes.csv",
+    "Uvas frescas": "ExpUva.csv",
+    "Suco de uva": "ExpSuco.csv"
+  }
+}
+````
 
 ## 4. Download de Arquivos (download):
-Para baixar os arquivos CSV, utilize o endpoint download. Forneça o link de download de um subtópico, e o arquivo será salvo na pasta storage do servidor.
+Para baixar os arquivos CSV, utilize o endpoint download. Forneça o nome do arquivo de um subtópico, e o arquivo será salvo na pasta storage do servidor.
+Exemplo:
+````
+Producao.csv
+````
 
 ## 5. Visualização de Arquivos (show):
 
@@ -61,3 +98,6 @@ from pos-tech
 ```bash
 pytest src/tests/<file_name>
 ```
+
+
+
